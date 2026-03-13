@@ -83,25 +83,19 @@ The loader accepts any subset of the files — you can start with a single CSV f
 ### Installation
 
 ```bash
-# Clone the repository
-git clone <repo-url>
+git clone https://github.com/mateolafalce/smart-alarm-triage.git
 cd smart-alarm-triage
 
-# Install dependencies (editable mode with dev extras)
 make install
-# or: pip install -e ".[dev]"
 ```
 
 ### Training
 
 ```bash
-# Train all models on the full dataset
 make train
 
-# Quick test with 50k rows, LightGBM only
 make train-sample
 
-# Custom options
 python scripts/train.py \
     --config config.yaml \
     --sample 100000 \
@@ -111,14 +105,12 @@ python scripts/train.py \
 ### Evaluation
 
 ```bash
-# Evaluate saved models against a labelled CSV
 python scripts/evaluate.py --input data/raw/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
 ```
 
 ### Prediction
 
 ```bash
-# Run inference on unlabelled data
 python scripts/predict.py \
     --input data/raw/sample.csv \
     --model lightgbm \
@@ -129,7 +121,6 @@ python scripts/predict.py \
 
 ```bash
 make test
-# or: pytest tests/ -v --tb=short
 ```
 
 ---
@@ -140,14 +131,12 @@ make test
 
 ```bash
 make docker-build
-# or: docker compose build
 ```
 
 ### Run training
 
 ```bash
 make docker-train
-# or: docker compose run --rm train
 ```
 
 ### Run training with custom arguments
@@ -159,50 +148,7 @@ docker compose run --rm train python scripts/train.py --sample 50000 --models li
 ### Run prediction
 
 ```bash
-# Uses the `predict` profile defined in docker-compose.yml
 docker compose --profile predict up predict
-```
-
-## Project Structure
-
-```
-smart-alarm-triage/
-├── data/
-│   ├── raw/              # Place CICIDS2017 CSV files here
-│   └── processed/        # Intermediate processed data
-├── models/               # Saved model artifacts (.pkl)
-├── reports/
-│   └── figures/          # Confusion matrix plots
-├── src/
-│   ├── config.py         # Config loader (config.yaml -> dict)
-│   ├── data/
-│   │   ├── loader.py       # CICIDSLoader: reads and concatenates CSVs
-│   │   ├── preprocessor.py # CICIDSPreprocessor: clean + map labels
-│   │   └── synthesizer.py  # AlarmSynthesizer: synthetic fire/medical
-│   ├── features/
-│   │   └── engineering.py  # AlarmFeatureEngineer (sklearn Transformer)
-│   ├── models/
-│   │   ├── pipelines.py    # Pipeline builders for each model
-│   │   ├── trainer.py      # AlarmModelTrainer with CV
-│   │   └── evaluator.py    # AlarmModelEvaluator: metrics + plots
-│   └── utils/
-│       └── logger.py       # Structured logging helper
-├── scripts/
-│   ├── train.py            # Training entrypoint
-│   ├── evaluate.py         # Evaluation on saved models
-│   └── predict.py          # Inference entrypoint
-├── tests/
-│   ├── test_loader.py
-│   ├── test_preprocessor.py
-│   └── test_pipeline.py
-├── Dockerfile
-├── docker-compose.yml
-├── .dockerignore
-├── requirements.txt
-├── setup.py
-├── config.yaml
-├── Makefile
-└── README.md
 ```
 
 ## Synthetic Categories

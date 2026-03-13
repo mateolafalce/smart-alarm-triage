@@ -75,11 +75,6 @@ The loader accepts any subset of the files — you can start with a single CSV f
 
 ## Quick Start
 
-### Prerequisites
-
-- Python 3.10+
-- CICIDS2017 CSV files in `data/raw/`
-
 ### Installation
 
 ```bash

@@ -1,65 +1,3 @@
-# Smart Alarm Triage
-
-![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Docker](https://img.shields.io/badge/docker-ready-blue)
-![Status](https://img.shields.io/badge/status-experimental-orange)
-
-A machine learning system that classifies security and physical alarm events into five actionable categories using network traffic features derived from the CICIDS2017 dataset. Three classifiers are trained and compared: Random Forest, XGBoost, and LightGBM.
-
----
-
-## Overview
-
-Traditional intrusion detection systems generate a flat stream of alerts — a single binary "benign / malicious" signal that leaves security operators without context about the nature and urgency of each alarm. **Smart Alarm Triage** re-frames this problem as a 5-class classification task:
-
-| Category | Description |
-|---|---|
-| `false_alarm` | Benign traffic incorrectly flagged |
-| `intrusion_real` | Confirmed network intrusion (port scans, brute force, bots, etc.) |
-| `panic` | Overwhelming volumetric event (DoS / DDoS) |
-| `fire` | Physical fire event (synthetic; requires real sensor data in production) |
-| `medical_emergency` | Physical medical event (synthetic; requires real sensor data in production) |
-
-The pipeline is fully reproducible: download the CICIDS2017 CSVs, run `make train`, and receive trained model artifacts plus evaluation reports.
-
----
-
-## Dataset
-
-**CICIDS2017** (Canadian Institute for Cybersecurity Intrusion Detection Evaluation Dataset 2017) contains 2.8 million network flows generated over five weekdays, labelled with 15 attack types and a BENIGN class.
-
-Download instructions:
-1. Visit https://www.unb.ca/cic/datasets/ids-2017.html
-2. Download the **MachineLearningCSV.zip** file
-3. Extract the CSV files into `data/raw/`
-
-The loader accepts any subset of the files — you can start with a single CSV (e.g., `Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv`) for fast iteration.
-
-### Label Mapping
-
-| CICIDS2017 Label | Alarm Category |
-|---|---|
-| BENIGN | false_alarm |
-| DoS Hulk | panic |
-| DDoS | panic |
-| DoS GoldenEye | panic |
-| DoS slowloris | panic |
-| DoS Slowhttptest | panic |
-| PortScan | intrusion_real |
-| FTP-Patator | intrusion_real |
-| SSH-Patator | intrusion_real |
-| Bot | intrusion_real |
-| Web Attack - Brute Force | intrusion_real |
-| Web Attack - XSS | intrusion_real |
-| Web Attack - Sql Injection | intrusion_real |
-| Infiltration | intrusion_real |
-| Heartbleed | intrusion_real |
-
----
-
-## Architecture
-
 ```
 ┌─────────────┐     ┌───────────────────┐     ┌──────────────────────┐
 │  data/raw/  │────>│  CICIDSLoader     │────>│  CICIDSPreprocessor  │
@@ -92,7 +30,46 @@ The loader accepts any subset of the files — you can start with a single CSV (
                                               └───────────────────────┘
 ```
 
-The pipeline uses `StratifiedKFold` cross-validation (5 folds) during training, then evaluates on a held-out 20% test split. All preprocessing steps are encapsulated inside the sklearn `Pipeline` object so they are applied consistently at inference time.
+<div align="center">
+
+# Smart Alarm Triage
+
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+
+</div>
+
+A machine learning system that classifies security and physical alarm events into five actionable categories using network traffic features derived from the CICIDS2017 dataset. Three classifiers are trained and compared: Random Forest, XGBoost, and LightGBM.
+
+---
+
+## Overview
+
+Traditional intrusion detection systems generate a flat stream of alerts — a single binary "benign / malicious" signal that leaves security operators without context about the nature and urgency of each alarm. **Smart Alarm Triage** re-frames this problem as a 5-class classification task:
+
+| Category | Description |
+|---|---|
+| `false_alarm` | Benign traffic incorrectly flagged |
+| `intrusion_real` | Confirmed network intrusion (port scans, brute force, bots, etc.) |
+| `panic` | Overwhelming volumetric event (DoS / DDoS) |
+| `fire` | Physical fire event (synthetic; requires real sensor data in production) |
+| `medical_emergency` | Physical medical event (synthetic; requires real sensor data in production) |
+
+The pipeline is fully reproducible: download the CICIDS2017 CSVs, run `make train`, and receive trained model artifacts plus evaluation reports.
+
+---
+
+## Dataset
+
+**CICIDS2017** (Canadian Institute for Cybersecurity Intrusion Detection Evaluation Dataset 2017) contains 2.8 million network flows generated over five weekdays, labelled with 15 attack types and a BENIGN class.
+
+Download instructions:
+1. Visit https://www.unb.ca/cic/datasets/ids-2017.html
+2. Download the **MachineLearningCSV.zip** file
+3. Extract the CSV files into `data/raw/`
+
+The loader accepts any subset of the files — you can start with a single CSV for fast iteration.
 
 ---
 
@@ -245,24 +222,4 @@ synthesis:
   medical_emergency_samples: 3000
   noise_std: 0.1
 ```
-
-**Important:** These synthetic samples are statistical approximations. The classifier's behaviour on `fire` and `medical_emergency` inputs reflects the synthetic distribution, not real-world sensor data.
-
----
-
-## Production Considerations
-
-Before deploying this system in a real environment, the following changes are strongly recommended:
-
-1. **Replace synthetic categories with real data.** Integrate actual smoke detector telemetry, wearable health sensor streams, and physical panic button events to train the `fire` and `medical_emergency` classes.
-
-2. **Retrain on domain-specific traffic.** CICIDS2017 was captured in a lab environment. Real deployment networks may have different baseline traffic patterns. Consider fine-tuning or retraining on network captures from the target environment.
-
-3. **Add a confidence threshold.** The `predict.py` script outputs per-class probabilities. In production, low-confidence predictions should be escalated to human review rather than acted upon automatically.
-
-4. **Monitor for drift.** Network traffic distributions change over time. Implement monitoring to detect model degradation and trigger retraining.
-
-5. **Harden the feature pipeline.** Edge cases such as completely empty flows, non-numeric columns, and unseen feature names should be handled gracefully in the preprocessing layer.
-
-6. **Secure model artifacts.** Serialised `.pkl` files can execute arbitrary code when loaded. Use signed model registries and verify checksums before loading models in production.
 

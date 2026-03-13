@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  train:
+    build: .
+    image: smart-alarm-triage:latest
+    container_name: alarm-triage-train
+    command: ["python", "scripts/train.py", "--models", "lightgbm", "xgboost"]
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  predict:
+    image: smart-alarm-triage:latest
+    container_name: alarm-triage-predict
+    command: ["python", "scripts/predict.py", "--input", "data/raw/sample.csv", "--model", "lightgbm"]
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    profiles:
+      - predict
+    environment:
+      - PYTHONUNBUFFERED=1

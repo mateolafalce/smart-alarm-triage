@@ -1,0 +1,73 @@
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  test_size: 0.2
+  val_size: 0.1
+  random_state: 42
+
+cicids:
+  label_column: "Label"
+  encoding: "latin-1"
+  sample_size: null  # null = use all data; set integer to subsample
+
+label_mapping:
+  BENIGN: "false_alarm"
+  "DoS Hulk": "panic"
+  PortScan: "intrusion_real"
+  DDoS: "panic"
+  "DoS GoldenEye": "panic"
+  "FTP-Patator": "intrusion_real"
+  "SSH-Patator": "intrusion_real"
+  "DoS slowloris": "panic"
+  "DoS Slowhttptest": "panic"
+  Bot: "intrusion_real"
+  "Web Attack \u2013 Brute Force": "intrusion_real"
+  "Web Attack \u2013 XSS": "intrusion_real"
+  "Web Attack \u2013 Sql Injection": "intrusion_real"
+  Infiltration: "intrusion_real"
+  Heartbleed: "intrusion_real"
+
+alarm_categories:
+  - false_alarm
+  - intrusion_real
+  - panic
+  - fire
+  - medical_emergency
+
+synthesis:
+  fire_samples: 5000
+  medical_emergency_samples: 3000
+  noise_std: 0.1
+
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 15
+    random_state: 42
+    n_jobs: -1
+
+  xgboost:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+    random_state: 42
+    n_jobs: -1
+    eval_metric: "mlogloss"
+    use_label_encoder: false
+
+  lightgbm:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.05
+    random_state: 42
+    n_jobs: -1
+    verbose: -1
+
+training:
+  cv_folds: 5
+  scoring: "f1_weighted"
+  save_best_only: true
+
+output:
+  models_dir: "models"
+  reports_dir: "reports"

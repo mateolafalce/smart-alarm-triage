@@ -9,22 +9,6 @@ A machine learning system that classifies security and physical alarm events int
 
 ---
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Dataset](#dataset)
-- [Label Mapping](#label-mapping)
-- [Architecture](#architecture)
-- [Quick Start](#quick-start)
-- [Docker](#docker)
-- [Project Structure](#project-structure)
-- [Model Performance](#model-performance)
-- [Synthetic Categories](#synthetic-categories)
-- [Production Considerations](#production-considerations)
-- [License](#license)
-
----
-
 ## Overview
 
 Traditional intrusion detection systems generate a flat stream of alerts — a single binary "benign / malicious" signal that leaves security operators without context about the nature and urgency of each alarm. **Smart Alarm Triage** re-frames this problem as a 5-class classification task:
@@ -202,18 +186,6 @@ docker compose run --rm train python scripts/train.py --sample 50000 --models li
 docker compose --profile predict up predict
 ```
 
-### Volume mounts
-
-The `docker-compose.yml` mounts three local directories into the container:
-
-| Host | Container | Purpose |
-|---|---|---|
-| `./data` | `/app/data` | CICIDS CSV files + processed data |
-| `./models` | `/app/models` | Saved model artifacts (`.pkl`) |
-| `./reports` | `/app/reports` | Evaluation JSON + confusion matrix PNGs |
-
----
-
 ## Project Structure
 
 ```
@@ -256,22 +228,6 @@ smart-alarm-triage/
 └── README.md
 ```
 
----
-
-## Model Performance
-
-> Placeholder — run `make train` with the full CICIDS2017 dataset to populate.
-
-| Model | F1 (weighted) | ROC-AUC (weighted) |
-|---|---|---|
-| LightGBM | — | — |
-| XGBoost | — | — |
-| Random Forest | — | — |
-
-Evaluation results are saved to `reports/evaluation_results.json` and confusion matrix plots to `reports/figures/cm_<model>.png` after training.
-
----
-
 ## Synthetic Categories
 
 The CICIDS2017 dataset covers network-layer events only. The `fire` and `medical_emergency` categories represent physical-world alarms that have no equivalent in the dataset.
@@ -310,8 +266,3 @@ Before deploying this system in a real environment, the following changes are st
 
 6. **Secure model artifacts.** Serialised `.pkl` files can execute arbitrary code when loaded. Use signed model registries and verify checksums before loading models in production.
 
----
-
-## License
-
-MIT License. See `LICENSE` for details.
